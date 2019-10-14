@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OrderReceiptTest {
     @Test
     public void shouldPrintCustomerInformationOnOrder() {
-        Order order = new Order("Mr X", "Chicago, 60601", new ArrayList<LineItem>());
+        Order order = new Order("Mr X", "Chicago, 60601", new ArrayList<Item>());
         OrderReceipt receipt = new OrderReceipt(order);
 
         String output = receipt.printReceipt();
@@ -20,10 +20,10 @@ public class OrderReceiptTest {
 
     @Test
     public void shouldPrintLineItemAndSalesTaxInformation() {
-        ArrayList<LineItem> lineItems = new ArrayList<LineItem>() {{
-            add(new LineItem("milk", 10.0, 2));
-            add(new LineItem("biscuits", 5.0, 5));
-            add(new LineItem("chocolate", 20.0, 1));
+        ArrayList<Item> lineItems = new ArrayList<Item>() {{
+            add(new Item("milk", 10.0, 2));
+            add(new Item("biscuits", 5.0, 5));
+            add(new Item("chocolate", 20.0, 1));
         }};
         OrderReceipt receipt = new OrderReceipt(new Order(null, null, lineItems));
 

@@ -1,5 +1,9 @@
 package org.katas.refactoring;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.DeflaterOutputStream;
+
 /**
  * OrderReceipt prints the details of order including customer name, address, description, quantity,
  * price and amount. It also calculates the sales tax @ 10% and prints as part
@@ -7,50 +11,43 @@ package org.katas.refactoring;
  * total sales tax) and prints it.
  */
 public class OrderReceipt {
-    private Order o;
+    private static final String TOTAL_SALES_TAX_KEY = "Total Sale Tax";
+    private static final String GRAND_TOTAL_KEY = "Grand Total";
+    private Order order;
 
-    public OrderReceipt(Order o) {
-        this.o = o;
+    public OrderReceipt(Order order) {
+        this.order = order;
     }
 
     public String printReceipt() {
+        return renderReceiptText(calculateReceipt());
+    }
+
+    private Map<String, Object> calculateReceipt() {
+        Map<String, Object> finalReceipt = new HashMap<>();
+        Double totalSalesTax = order.getItems().stream().mapToDouble(lineItem -> lineItem.getTotalAmount() * .10).sum();
+        Double grandTotal = order.getItems().stream().mapToDouble(Item::getTotalAmount).sum() + totalSalesTax ;
+        finalReceipt.put(TOTAL_SALES_TAX_KEY, totalSalesTax);
+        finalReceipt.put(GRAND_TOTAL_KEY, grandTotal);
+        return finalReceipt;
+    }
+
+    private String renderReceiptText(Map<String, Object> finalReceipt) {
         StringBuilder output = new StringBuilder();
-
-        // print headers
         output.append("======Printing Orders======\n");
+        output.append(order.getCustomerName());
+        output.append(order.getCustomerAddress());
 
-        // print date, bill no, customer name
-//        output.append("Date - " + order.getDate();
-        output.append(o.getCustomerName());
-        output.append(o.getCustomerAddress());
-//        output.append(order.getCustomerLoyaltyNumber());
+        this.order.getItems().forEach( item -> {
+            String tempStringHolder = item.getDescription() + '\t'
+                    + item.getPrice() + '\t'
+                    + item.getQuantity() + '\t'
+                    + item.getTotalAmount() + '\n';
+            output.append(tempStringHolder);
+        });
 
-        // prints lineItems
-        double totSalesTx = 0d;
-        double tot = 0d;
-        for (LineItem lineItem : o.getLineItems()) {
-            output.append(lineItem.getDescription());
-            output.append('\t');
-            output.append(lineItem.getPrice());
-            output.append('\t');
-            output.append(lineItem.getQuantity());
-            output.append('\t');
-            output.append(lineItem.totalAmount());
-            output.append('\n');
-
-            // calculate sales tax @ rate of 10%
-            double salesTax = lineItem.totalAmount() * .10;
-            totSalesTx += salesTax;
-
-            // calculate total amount of lineItem = price * quantity + 10 % sales tax
-            tot += lineItem.totalAmount() + salesTax;
-        }
-
-        // prints the state tax
-        output.append("Sales Tax").append('\t').append(totSalesTx);
-
-        // print total amount
-        output.append("Total Amount").append('\t').append(tot);
+        output.append("Sales Tax").append('\t').append(finalReceipt.get(TOTAL_SALES_TAX_KEY));
+        output.append("Total Amount").append('\t').append(finalReceipt.get(GRAND_TOTAL_KEY));
         return output.toString();
     }
 }
